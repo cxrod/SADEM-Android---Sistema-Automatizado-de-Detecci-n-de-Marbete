@@ -1,4 +1,4 @@
-package com.hackaton.sadm.pref;
+package com.hackaton.sadem.pref;
 
 import android.content.Context;
 import android.content.SharedPreferences;

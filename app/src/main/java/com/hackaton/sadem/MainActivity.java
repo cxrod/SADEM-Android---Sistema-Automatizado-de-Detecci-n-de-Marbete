@@ -1,4 +1,4 @@
-package com.hackaton.sadm;
+package com.hackaton.sadem;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;

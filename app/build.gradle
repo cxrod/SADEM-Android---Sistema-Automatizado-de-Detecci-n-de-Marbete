@@ -8,7 +8,7 @@ android {
     compileSdkVersion 27
     buildToolsVersion "27.0.1"
     defaultConfig {
-        applicationId "com.hackaton.sadm"
+        applicationId "com.hackaton.sadem"
         minSdkVersion 19
         targetSdkVersion 27
         versionCode 2
@@ -49,4 +49,7 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile "com.squareup.retrofit2:converter-gson:2.3.0"
     compile 'com.squareup.okhttp3:logging-interceptor:3.5.0'
+
+    compile 'com.github.bumptech.glide:glide:4.3.1'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
 }

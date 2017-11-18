@@ -1,4 +1,4 @@
-package com.hackaton.sadm;
+package com.hackaton.sadem;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.hackaton.sadm", appContext.getPackageName());
+        assertEquals("com.hackaton.sadem", appContext.getPackageName());
     }
 }

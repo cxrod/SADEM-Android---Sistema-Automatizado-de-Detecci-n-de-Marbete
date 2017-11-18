@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    tools:context="com.hackaton.sadm.LauncherActivity">
+    tools:context="com.hackaton.sadem.LauncherActivity">
 
     <LinearLayout
         android:layout_width="match_parent"

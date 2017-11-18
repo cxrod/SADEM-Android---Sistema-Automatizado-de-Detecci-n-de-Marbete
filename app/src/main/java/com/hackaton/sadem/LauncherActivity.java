@@ -1,4 +1,4 @@
-package com.hackaton.sadm;
+package com.hackaton.sadem;
 
 import android.Manifest;
 import android.content.Intent;
@@ -10,7 +10,7 @@ import android.util.Log;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.hackaton.sadm.pref.PreferenceHelper;
+import com.hackaton.sadem.pref.PreferenceHelper;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.listener.multi.BaseMultiplePermissionsListener;

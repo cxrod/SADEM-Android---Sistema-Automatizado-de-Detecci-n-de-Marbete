@@ -31,8 +31,13 @@
     <string name="error_field_required">Este campo es requerido</string>
 
     <!-- Main Activity -->
-
     <string name="capture">Capturar</string>
+
+    <!-- Camera Activity -->
+    <string name="dialog_result_title">Resultado</string>
+    <string name="cant_recognize">No se pudo reconocer una placa</string>
+    <string name="processing_image">Procesando imagen</string>
+    <string name="processing_plate">Consultando placa</string>
 
     <string name="title_activity_camera">Camera Activity</string>
     <string name="dummy_button">Dummy Button</string>

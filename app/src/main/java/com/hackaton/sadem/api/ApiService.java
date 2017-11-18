@@ -1,11 +1,10 @@
-package com.hackaton.sadm.api;
+package com.hackaton.sadem.api;
 
-import com.hackaton.sadm.api.model.LoginRequest;
-import com.hackaton.sadm.api.model.LoginResponse;
+import com.hackaton.sadem.api.model.LoginRequest;
+import com.hackaton.sadem.api.model.LoginResponse;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
-import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 /**

@@ -1,11 +1,9 @@
-package com.hackaton.sadm.util;
+package com.hackaton.sadem.util;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.provider.Settings;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;

@@ -1,4 +1,4 @@
-package com.hackaton.sadm.api;
+package com.hackaton.sadem.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

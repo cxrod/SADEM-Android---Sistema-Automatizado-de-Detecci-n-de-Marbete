@@ -1,4 +1,4 @@
-package com.hackaton.sadm;
+package com.hackaton.sadem;
 
 import org.junit.Test;
 

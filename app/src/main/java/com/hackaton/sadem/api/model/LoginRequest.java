@@ -1,4 +1,4 @@
-package com.hackaton.sadm.api.model;
+package com.hackaton.sadem.api.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
