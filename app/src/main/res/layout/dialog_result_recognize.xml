@@ -35,6 +35,16 @@
 
     </LinearLayout>
 
+
+    <TextView
+        android:id="@+id/result_dgii"
+        android:textStyle="bold"
+        android:textSize="18dp"
+        android:textColor="@android:color/holo_red_dark"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+
     <LinearLayout
         android:id="@+id/progress_bar_layout"
         android:orientation="vertical"
@@ -54,6 +64,5 @@
             android:layout_height="wrap_content" />
 
     </LinearLayout>
-
 
 </LinearLayout>

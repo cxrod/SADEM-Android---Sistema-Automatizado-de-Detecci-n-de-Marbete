@@ -1,9 +1,12 @@
 package com.hackaton.sadem;
 
 import android.graphics.Bitmap;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +19,10 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import com.hackaton.sadem.api.ApiHelper;
+import com.hackaton.sadem.api.ApiService;
+import com.hackaton.sadem.api.model.DgiiResponse;
+import com.hackaton.sadem.pref.PreferenceHelper;
 import com.wonderkiln.camerakit.CameraKitError;
 import com.wonderkiln.camerakit.CameraKitEvent;
 import com.wonderkiln.camerakit.CameraKitEventListener;
@@ -30,6 +37,12 @@ import org.openalpr.model.ResultsError;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class CameraActivity extends AppCompatActivity {
 
@@ -44,6 +57,8 @@ public class CameraActivity extends AppCompatActivity {
     private CameraView mCamera;
     private ImageView mShootCamera;
     private OpenALPR mOpenALPR;
+    private ApiService apiService;
+    private PreferenceHelper preferenceHelper;
 
     private MaterialDialog resultDialog;
     private View resultView;
@@ -53,6 +68,7 @@ public class CameraActivity extends AppCompatActivity {
     private TextView resultPlate;
     private TextView resultConfidence;
     private TextView resultProgressText;
+    private TextView resultDgiiText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +83,9 @@ public class CameraActivity extends AppCompatActivity {
         initResultView();
         initCamera();
         initOpenALPR();
+
+        preferenceHelper = new PreferenceHelper(this);
+        apiService = ApiHelper.newApiService(preferenceHelper.getAccessToken());
     }
 
     @Override
@@ -96,6 +115,7 @@ public class CameraActivity extends AppCompatActivity {
         resultPlate = (TextView) resultView.findViewById(R.id.result_plate);
         resultConfidence = (TextView) resultView.findViewById(R.id.result_confidence);
         resultProgressText = (TextView) resultView.findViewById(R.id.progress_text);
+        resultDgiiText = (TextView) resultView.findViewById(R.id.result_dgii);
     }
 
     private void initCamera() {
@@ -163,6 +183,7 @@ public class CameraActivity extends AppCompatActivity {
         resultProgressText.setText(R.string.processing_image);
         resultProgressLayout.setVisibility(View.VISIBLE);
         resultPlateLayout.setVisibility(View.GONE);
+        resultDgiiText.setVisibility(View.GONE);
         resultDialog.show();
         mCamera.stop();
         recognizePlate(imageFile.getAbsolutePath());
@@ -213,25 +234,95 @@ public class CameraActivity extends AppCompatActivity {
         }
     }
 
-
-
-    private void renderPlateResult(final Results results, String imagePath){
+    private void renderPlateResult(final Results results, final String imagePath){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                String plate = results.getResults().get(0).getPlate();
                 resultProgressText.setText(R.string.processing_plate);
                 resultPlateLayout.setVisibility(View.VISIBLE);
-                resultPlate.setText(results.getResults().get(0).getPlate());
+                resultPlate.setText(plate);
                 resultConfidence.setText(
                         String.valueOf(Math.round(results.getResults().get(0).getConfidence()))
                         + "% de confianza"
                 );
+                doDgiiQuery(plate, imagePath);
             }
         });
+    }
+
+    private void doDgiiQuery(final String plate, final String imagePath){
+        Call<DgiiResponse> dgiiCall = apiService.doDegiiQuery(plate, getCoordenates());
+        dgiiCall.enqueue(new Callback<DgiiResponse>() {
+            @Override
+            public void onResponse(Call<DgiiResponse> call, Response<DgiiResponse> response) {
+                if (response.code() == 200 && response.body() != null && response.body().getData() != null) {
+                    renderDgiiResult(response.body().getData(), imagePath);
+                    //upload photo
+                } else {
+                    DgiiResponse.Code code = new DgiiResponse.Code("999", "No se pudo conectar con el servidor");
+                    DgiiResponse.Data data = new DgiiResponse.Data(code);
+                    renderDgiiResult(data, imagePath);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DgiiResponse> call, Throwable t) {
+                DgiiResponse.Code code = new DgiiResponse.Code("999", "No se pudo conectar con el servidor");
+                DgiiResponse.Data data = new DgiiResponse.Data(code);
+                renderDgiiResult(data, imagePath);
+            }
+        });
+    }
+
+    private void renderDgiiResult(final DgiiResponse.Data data, final String imagePath){
+        boolean temp = false;
+        switch (data.getCode().getCode()){
+            case "902":
+            case "915":
+            case "911":
+                temp = true;
+                break;
+        }
+        final boolean stopCard = temp;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                resultProgressLayout.setVisibility(View.GONE);
+                resultDgiiText.setVisibility(View.VISIBLE);
+                resultDgiiText.setText(data.getCode().getDescription());
+
+                resultDgiiText.setTextColor(getResources().getColor(
+                        stopCard?android.R.color.holo_red_dark:android.R.color.holo_green_dark));
+
+            }
+        });
+        if (stopCard){
+            playAlarm();
+        }else{
+            new Handler().postDelayed(new Runnable() {
+                public void run() {
+                    dismissDialog();
+                }
+            }, 1000);
+        }
+    }
+
+    private void playAlarm(){
+        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+        Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+        r.play();
     }
 
     private void dismissDialog(){
         mCamera.start();
         resultDialog.dismiss();
+    }
+
+    private Map<String, String> getCoordenates(){
+        Map<String, String> coordinates= new HashMap<>();
+        coordinates.put("latitude", "18");
+        coordinates.put("longitude", "20.332");
+        return coordinates;
     }
 }

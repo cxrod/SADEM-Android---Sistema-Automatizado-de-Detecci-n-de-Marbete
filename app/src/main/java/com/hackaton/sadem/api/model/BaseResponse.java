@@ -10,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
 public class BaseResponse {
 
     @Expose
-    @SerializedName("status_code")
+    @SerializedName("status")
     private String statusCode;
 
     @Expose

@@ -31,7 +31,7 @@ import retrofit2.Response;
  */
 public class LoginActivity extends AppCompatActivity {
 
-    ApiService apiService;
+    private ApiService apiService;
     // UI references.
     private EditText mUsernameView;
     private EditText mPasswordView;

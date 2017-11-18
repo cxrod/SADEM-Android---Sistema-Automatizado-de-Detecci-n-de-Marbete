@@ -34,7 +34,7 @@ public class ApiHelper {
                 Request.Builder builder = originalRequest.newBuilder();
 
                 if (accessToken != null){
-                    builder.header("Authorization", "Baerer "+accessToken);
+                    builder.header("Authorization", "Token "+accessToken);
                 }
 
                 Request newRequest = builder.build();

@@ -30,8 +30,8 @@ public class PreferenceHelper {
     }
 
     public boolean isUserLogged(){
-        //return mPrefs.getString(PREF_KEY_USER_TOKEN, null) != null;
-        return true;
+        return mPrefs.getString(PREF_KEY_USER_TOKEN, null) != null;
+        //return true;
     }
 
 }
