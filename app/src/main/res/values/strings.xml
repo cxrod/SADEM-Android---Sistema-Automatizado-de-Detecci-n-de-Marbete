@@ -20,11 +20,6 @@
     <string name="dialog_wait_title">Espere</string>
     <string name="dialog_wait_content">procesando.</string>
 
-    <string name="title_activity_camera">Camera Activity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
-    <string name="title_activity_login">Iniciar Sesión</string>
-
     <!-- Strings related to login -->
     <string name="prompt_username">Usuario</string>
     <string name="prompt_password">Contraseña</string>
@@ -34,5 +29,14 @@
     <string name="error_invalid_password">Contraseña invalida</string>
     <string name="error_incorrect_password">Contraseña incorrecta</string>
     <string name="error_field_required">Este campo es requerido</string>
+
+    <!-- Main Activity -->
+
+    <string name="capture">Capturar</string>
+
+    <string name="title_activity_camera">Camera Activity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="title_activity_login">Iniciar Sesión</string>
 
 </resources>
