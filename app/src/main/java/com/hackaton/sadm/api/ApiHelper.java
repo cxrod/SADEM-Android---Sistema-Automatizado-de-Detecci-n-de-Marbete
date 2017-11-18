@@ -8,6 +8,7 @@ import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -39,7 +40,9 @@ public class ApiHelper {
                 Request newRequest = builder.build();
                 return chain.proceed(newRequest);
             }
-        }).build();
+        })
+        .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+        .build();
 
         Gson gson = new GsonBuilder()
                 .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")

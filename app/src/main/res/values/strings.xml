@@ -11,9 +11,14 @@
 
     <!-- Login fail dialog-->
     <string name="dialog_login_fail_title">Disculpe</string>
-    <string name="dialog_login_fail_content">Ha ocurrido un problema durancte la utenticación, por favor intente de nuevo.</string>
+    <string name="dialog_login_fail_content">Ha ocurrido un problema durante la auntenticación, por favor intente de nuevo.</string>
+    <string name="dialog_login_bad_content">Usuario y/o contraseña incorrectos, por favor verifiquelos.</string>
     <string name="dialog_login_fail_ok">Reintentar</string>
     <string name="dialog_login_fail_cancel">Cancelar</string>
+
+    <!-- Login fail dialog-->
+    <string name="dialog_wait_title">Espere</string>
+    <string name="dialog_wait_content">procesando.</string>
 
     <string name="title_activity_camera">Camera Activity</string>
     <string name="dummy_button">Dummy Button</string>

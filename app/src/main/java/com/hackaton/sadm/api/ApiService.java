@@ -14,7 +14,7 @@ import retrofit2.http.POST;
 
 public interface ApiService {
 
-    @POST("588d15f5100000a8072d2945")
+    @POST("get-token/")
     Call<LoginResponse> doLoginApiCall(@Body LoginRequest request);
 
 //    @POST("588d15d3100000ae072d2944")

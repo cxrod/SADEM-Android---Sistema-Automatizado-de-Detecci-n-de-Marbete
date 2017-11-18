@@ -1,18 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center"
     tools:context="com.hackaton.sadm.LauncherActivity">
 
-    <ImageView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:src="@drawable/logo_hackaton"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"/>
+        android:orientation="vertical">
 
-</RelativeLayout>
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/logo_white_sadem" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="40dp"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="-24dp"
+            android:src="@drawable/logo_hackaton" />
+    </LinearLayout>
+
+</LinearLayout>

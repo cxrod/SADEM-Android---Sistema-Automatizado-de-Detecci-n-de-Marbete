@@ -3,8 +3,6 @@ package com.hackaton.sadm.pref;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.hackaton.sadm.pref.model.User;
-
 /**
  * Created by cesar_000 on 17/11/2017.
  */
@@ -14,7 +12,7 @@ public class PreferenceHelper {
     public static final long NULL_INDEX = -1L;
     public static final String PREF_FILE_NAME = "SADEM_PREFERENCE";
 
-    private static final String PREF_KEY_USER_LOGGED_IN = "PREF_KEY_USER_LOGGED_IN";
+    private static final String PREF_KEY_USER_TOKEN = "PREF_KEY_USER_TOKEN";
 
     private final SharedPreferences mPrefs;
 
@@ -22,17 +20,17 @@ public class PreferenceHelper {
         mPrefs = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE);
     }
 
-    public User getCurrentUser() {
-        String user = mPrefs.getString(PREF_KEY_USER_LOGGED_IN, null);
-        return User.fromJson(user);
+    public String getAccessToken() {
+        String token = mPrefs.getString(PREF_KEY_USER_TOKEN, null);
+        return token;
     }
 
-    public void setCurrentUserName(User user) {
-        mPrefs.edit().putString(PREF_KEY_USER_LOGGED_IN, user.toJson()).apply();
+    public void setAccessToken(String token) {
+        mPrefs.edit().putString(PREF_KEY_USER_TOKEN, token).apply();
     }
 
     public boolean isUserLogged(){
-        return mPrefs.getString(PREF_KEY_USER_LOGGED_IN, null) != null;
+        return mPrefs.getString(PREF_KEY_USER_TOKEN, null) != null;
         //return true;
     }
 
