@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">SADEM</string>
+
+    <string name="dialog_action_ok">OK</string>
+
+    <!-- Launcher permission denied dialog-->
+    <string name="dialog_denied_title">Disculpe</string>
+    <string name="dialog_denied_content">Los permisos de camara y almacenamientos son necesarios para el correcto funcionamiento de la aplicación.</string>
+    <string name="dialog_denied_ok">Reintentar</string>
+    <string name="dialog_denied_cancel">Salir</string>
+
+    <!-- Login fail dialog-->
+    <string name="dialog_login_fail_title">Disculpe</string>
+    <string name="dialog_login_fail_content">Ha ocurrido un problema durancte la utenticación, por favor intente de nuevo.</string>
+    <string name="dialog_login_fail_ok">Reintentar</string>
+    <string name="dialog_login_fail_cancel">Cancelar</string>
+
+    <string name="title_activity_camera">Camera Activity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="title_activity_login">Iniciar Sesión</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_username">Usuario</string>
+    <string name="prompt_password">Contraseña</string>
+    <string name="action_sign_in">Iniciar Sesión</string>
+    <string name="action_sign_in_short">Iniciar Sesión</string>
+    <string name="error_invalid_username">Este usuario es invalido</string>
+    <string name="error_invalid_password">Contraseña invalida</string>
+    <string name="error_incorrect_password">Contraseña incorrecta</string>
+    <string name="error_field_required">Este campo es requerido</string>
+
+</resources>
