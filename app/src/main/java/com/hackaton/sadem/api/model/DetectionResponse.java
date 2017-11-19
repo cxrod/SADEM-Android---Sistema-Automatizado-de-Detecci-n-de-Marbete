@@ -6,13 +6,12 @@ import com.google.gson.annotations.SerializedName;
  * Created by cesar_000 on 18/11/2017.
  */
 
-public class DgiiResponse extends BaseResponse{
+public class DetectionResponse extends BaseResponse{
 
     @SerializedName("data")
-    private Marbete marbete;
+    private Detection detection;
 
-    public Marbete getMarbete() {
-        return marbete;
+    public Detection getDetection() {
+        return detection;
     }
-
 }

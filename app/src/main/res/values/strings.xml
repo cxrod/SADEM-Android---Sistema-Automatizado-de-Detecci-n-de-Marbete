@@ -38,6 +38,7 @@
     <string name="cant_recognize">No se pudo reconocer una placa</string>
     <string name="processing_image">Procesando imagen</string>
     <string name="processing_plate">Consultando placa</string>
+    <string name="close_dialog">Cerrar</string>
 
     <string name="title_activity_camera">Camera Activity</string>
     <string name="dummy_button">Dummy Button</string>

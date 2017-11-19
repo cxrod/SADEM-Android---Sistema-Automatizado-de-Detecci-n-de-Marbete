@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,6 +22,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.hackaton.sadem.api.ApiHelper;
 import com.hackaton.sadem.api.ApiService;
+import com.hackaton.sadem.api.model.Code;
+import com.hackaton.sadem.api.model.DetectionResponse;
+import com.hackaton.sadem.api.model.Marbete;
 import com.hackaton.sadem.api.model.DgiiResponse;
 import com.hackaton.sadem.pref.PreferenceHelper;
 import com.wonderkiln.camerakit.CameraKitError;
@@ -40,6 +44,9 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -63,12 +70,18 @@ public class CameraActivity extends AppCompatActivity {
     private MaterialDialog resultDialog;
     private View resultView;
     private View resultPlateLayout;
+    private View resultDgiiLayout;
     private View resultProgressLayout;
     private ImageView resultImage;
     private TextView resultPlate;
     private TextView resultConfidence;
     private TextView resultProgressText;
     private TextView resultDgiiText;
+    private TextView ownerDgiiText;
+    private TextView modelDgiiText;
+    private Button closeDialog;
+
+    private boolean autoShoot = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,11 +124,21 @@ public class CameraActivity extends AppCompatActivity {
         resultView = resultDialog.getView();
         resultPlateLayout = (View) resultView.findViewById(R.id.plate_result_layout);
         resultProgressLayout = (View) resultView.findViewById(R.id.progress_bar_layout);
+        resultDgiiLayout = (View) resultView.findViewById(R.id.dgii_result_layout);
         resultImage = (ImageView) resultView.findViewById(R.id.result_image);
         resultPlate = (TextView) resultView.findViewById(R.id.result_plate);
         resultConfidence = (TextView) resultView.findViewById(R.id.result_confidence);
         resultProgressText = (TextView) resultView.findViewById(R.id.progress_text);
         resultDgiiText = (TextView) resultView.findViewById(R.id.result_dgii);
+        ownerDgiiText = (TextView) resultView.findViewById(R.id.result_dgii_owner);
+        modelDgiiText = (TextView) resultView.findViewById(R.id.result_dgii_model);
+        closeDialog = (Button) resultView.findViewById(R.id.close_dialog);
+        closeDialog.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dismissDialog();
+            }
+        });
     }
 
     private void initCamera() {
@@ -133,8 +156,9 @@ public class CameraActivity extends AppCompatActivity {
 
             @Override
             public void onImage(CameraKitImage cameraKitImage) {
+                showResulDialog();
                 File image = saveImage(cameraKitImage.getBitmap());
-                showResulDialog(image);
+                setImageInDialog(image);
             }
 
             @Override
@@ -169,7 +193,7 @@ public class CameraActivity extends AppCompatActivity {
             imageFile = new File(storageDir, imageFileName);
             try {
                 OutputStream fOut = new FileOutputStream(imageFile);
-                image.compress(Bitmap.CompressFormat.JPEG, 100, fOut);
+                image.compress(Bitmap.CompressFormat.JPEG, 80, fOut);
                 fOut.close();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -178,14 +202,18 @@ public class CameraActivity extends AppCompatActivity {
         return imageFile;
     }
 
-    private void showResulDialog(File imageFile){
-        Glide.with(this).load(Uri.fromFile(imageFile)).into(resultImage);
+    private void showResulDialog(){
         resultProgressText.setText(R.string.processing_image);
         resultProgressLayout.setVisibility(View.VISIBLE);
         resultPlateLayout.setVisibility(View.GONE);
-        resultDgiiText.setVisibility(View.GONE);
+        resultDgiiLayout.setVisibility(View.GONE);
+        closeDialog.setVisibility(View.GONE);
         resultDialog.show();
         mCamera.stop();
+    }
+
+    private void setImageInDialog(File imageFile){
+        Glide.with(this).load(Uri.fromFile(imageFile)).into(resultImage);
         recognizePlate(imageFile.getAbsolutePath());
     }
 
@@ -252,35 +280,36 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void doDgiiQuery(final String plate, final String imagePath){
-        Call<DgiiResponse> dgiiCall = apiService.doDegiiQuery(plate, getCoordenates());
+        Call<DgiiResponse> dgiiCall = apiService.doDegiiQuery("G291192", getCoordenates());
         dgiiCall.enqueue(new Callback<DgiiResponse>() {
             @Override
             public void onResponse(Call<DgiiResponse> call, Response<DgiiResponse> response) {
-                if (response.code() == 200 && response.body() != null && response.body().getData() != null) {
-                    renderDgiiResult(response.body().getData(), imagePath);
+                if (response.code() == 200 && response.body() != null && response.body().getMarbete() != null) {
+                    renderDgiiResult(response.body().getMarbete(), imagePath);
                     //upload photo
                 } else {
-                    DgiiResponse.Code code = new DgiiResponse.Code("999", "No se pudo conectar con el servidor");
-                    DgiiResponse.Data data = new DgiiResponse.Data(code);
-                    renderDgiiResult(data, imagePath);
+                    Code code = new Code("404", "Matricula no encontrada");
+                    Marbete marbete = new Marbete(code);
+                    renderDgiiResult(marbete, imagePath);
                 }
             }
 
             @Override
             public void onFailure(Call<DgiiResponse> call, Throwable t) {
-                DgiiResponse.Code code = new DgiiResponse.Code("999", "No se pudo conectar con el servidor");
-                DgiiResponse.Data data = new DgiiResponse.Data(code);
-                renderDgiiResult(data, imagePath);
+                Code code = new Code("999", "No se pudo conectar con el servidor");
+                Marbete marbete = new Marbete(code);
+                renderDgiiResult(marbete, imagePath);
             }
         });
     }
 
-    private void renderDgiiResult(final DgiiResponse.Data data, final String imagePath){
+    private void renderDgiiResult(final Marbete marbete, final String imagePath){
         boolean temp = false;
-        switch (data.getCode().getCode()){
+        switch (marbete.getCode().getCode()){
             case "902":
             case "915":
             case "911":
+            case "404":
                 temp = true;
                 break;
         }
@@ -289,22 +318,30 @@ public class CameraActivity extends AppCompatActivity {
             @Override
             public void run() {
                 resultProgressLayout.setVisibility(View.GONE);
-                resultDgiiText.setVisibility(View.VISIBLE);
-                resultDgiiText.setText(data.getCode().getDescription());
-
+                resultDgiiLayout.setVisibility(View.VISIBLE);
+                resultDgiiText.setText(marbete.getCode().getDescription());
                 resultDgiiText.setTextColor(getResources().getColor(
                         stopCard?android.R.color.holo_red_dark:android.R.color.holo_green_dark));
-
+                ownerDgiiText.setText(marbete.getOwner()!=null? marbete.getOwner():"");
+                modelDgiiText.setText(marbete.getModel()!=null? marbete.getBrand()+" - "+ marbete.getModel():"");
+                if (stopCard){
+                    playAlarm();
+                }
             }
         });
         if (stopCard){
-            playAlarm();
+            //playAlarm();
+            uploadPhoto(marbete, imagePath);
+            closeDialog.setVisibility(View.VISIBLE);
         }else{
-            new Handler().postDelayed(new Runnable() {
+            if (autoShoot)
+                new Handler().postDelayed(new Runnable() {
                 public void run() {
                     dismissDialog();
                 }
             }, 1000);
+            else
+                closeDialog.setVisibility(View.VISIBLE);
         }
     }
 
@@ -312,6 +349,27 @@ public class CameraActivity extends AppCompatActivity {
         Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
         Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
         r.play();
+    }
+
+    private void uploadPhoto(Marbete marbete, String imagePath){
+        File image = new File(imagePath);
+        RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), image);
+        MultipartBody.Part body = MultipartBody.Part.createFormData("upload", image.getName(), reqFile);
+        RequestBody fined = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(false));
+        Call<DetectionResponse> call = apiService.doDetectionPut(marbete.getUuid(), body, fined);
+        call.enqueue(new Callback<DetectionResponse>() {
+            @Override
+            public void onResponse(Call<DetectionResponse> call, Response<DetectionResponse> response) {
+                if (response.code() == 200){
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<DetectionResponse> call, Throwable t) {
+
+            }
+        });
     }
 
     private void dismissDialog(){
