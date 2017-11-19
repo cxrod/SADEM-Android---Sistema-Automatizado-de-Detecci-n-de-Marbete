@@ -10,6 +10,7 @@ public class Marbete {
     private String license_plate;
     private String brand;
     private String model;
+    private String color;
     private String type_vehicle;
     private String year_production;
     private float amount;
@@ -42,6 +43,10 @@ public class Marbete {
 
     public String getModel() {
         return model;
+    }
+
+    public String getColor() {
+        return color;
     }
 
     public String getType_vehicle() {

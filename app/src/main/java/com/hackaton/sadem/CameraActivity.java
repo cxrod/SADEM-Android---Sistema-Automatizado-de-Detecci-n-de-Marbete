@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -62,10 +63,12 @@ public class CameraActivity extends AppCompatActivity {
     private static int RESULT_NUMBER = 10;
 
     private CameraView mCamera;
-    private ImageView mShootCamera;
+    private FloatingActionButton mShootCamera;
+    private FloatingActionButton mAutoShootCamera;
     private OpenALPR mOpenALPR;
     private ApiService apiService;
     private PreferenceHelper preferenceHelper;
+    private Ringtone alarm;
 
     private MaterialDialog resultDialog;
     private View resultView;
@@ -99,17 +102,22 @@ public class CameraActivity extends AppCompatActivity {
 
         preferenceHelper = new PreferenceHelper(this);
         apiService = ApiHelper.newApiService(preferenceHelper.getAccessToken());
+
+        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+        alarm = RingtoneManager.getRingtone(getApplicationContext(), notification);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        initResultView();
         mCamera.start();
     }
 
     @Override
     protected void onPause() {
         mCamera.stop();
+        resultDialog = null;
         super.onPause();
     }
 
@@ -167,10 +175,20 @@ public class CameraActivity extends AppCompatActivity {
             }
         });
 
-        mShootCamera = (ImageView) findViewById(R.id.shoot_camera_image_view);
+        mShootCamera = (FloatingActionButton) findViewById(R.id.shoot_camera_image_view);
         mShootCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                autoShoot = false;
+                if (mCamera != null) mCamera.captureImage();
+            }
+        });
+
+        mAutoShootCamera = (FloatingActionButton) findViewById(R.id.auto_shoot_image_view);
+        mAutoShootCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                autoShoot = true;
                 if (mCamera != null) mCamera.captureImage();
             }
         });
@@ -202,14 +220,16 @@ public class CameraActivity extends AppCompatActivity {
         return imageFile;
     }
 
-    private void showResulDialog(){
-        resultProgressText.setText(R.string.processing_image);
+    private void showResulDialog() {
+        if (resultDialog != null){
+            resultProgressText.setText(R.string.processing_image);
         resultProgressLayout.setVisibility(View.VISIBLE);
         resultPlateLayout.setVisibility(View.GONE);
         resultDgiiLayout.setVisibility(View.GONE);
         closeDialog.setVisibility(View.GONE);
         resultDialog.show();
         mCamera.stop();
+        }
     }
 
     private void setImageInDialog(File imageFile){
@@ -221,11 +241,13 @@ public class CameraActivity extends AppCompatActivity {
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                String result = mOpenALPR.recognizeWithCountryRegionNConfig(PLATE_COUNTRY, PLATE_REGION,
-                        imagePath, DATA_DIR + OPEN_ALPR_CONF_FILE, RESULT_NUMBER);
+                if (resultDialog != null) {
+                    String result = mOpenALPR.recognizeWithCountryRegionNConfig(PLATE_COUNTRY, PLATE_REGION,
+                            imagePath, DATA_DIR + OPEN_ALPR_CONF_FILE, RESULT_NUMBER);
 
-                Log.d("OPEN ALPR", result);
-                validatePlateResult(result, imagePath);
+                    Log.d("OPEN ALPR", result);
+                    validatePlateResult(result, imagePath);
+                }
             }
         });
     }
@@ -266,21 +288,23 @@ public class CameraActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                String plate = results.getResults().get(0).getPlate();
-                resultProgressText.setText(R.string.processing_plate);
-                resultPlateLayout.setVisibility(View.VISIBLE);
-                resultPlate.setText(plate);
-                resultConfidence.setText(
-                        String.valueOf(Math.round(results.getResults().get(0).getConfidence()))
-                        + "% de confianza"
-                );
-                doDgiiQuery(plate, imagePath);
+                if (resultDialog != null) {
+                    String plate = results.getResults().get(0).getPlate();
+                    resultProgressText.setText(R.string.processing_plate);
+                    resultPlateLayout.setVisibility(View.VISIBLE);
+                    resultPlate.setText(plate);
+                    resultConfidence.setText(
+                            String.valueOf(Math.round(results.getResults().get(0).getConfidence()))
+                                    + "% de confianza"
+                    );
+                    doDgiiQuery(plate, imagePath);
+                }
             }
         });
     }
 
     private void doDgiiQuery(final String plate, final String imagePath){
-        Call<DgiiResponse> dgiiCall = apiService.doDegiiQuery("G291192", getCoordenates());
+        Call<DgiiResponse> dgiiCall = apiService.doDegiiQuery(plate, getCoordenates());
         dgiiCall.enqueue(new Callback<DgiiResponse>() {
             @Override
             public void onResponse(Call<DgiiResponse> call, Response<DgiiResponse> response) {
@@ -323,7 +347,8 @@ public class CameraActivity extends AppCompatActivity {
                 resultDgiiText.setTextColor(getResources().getColor(
                         stopCard?android.R.color.holo_red_dark:android.R.color.holo_green_dark));
                 ownerDgiiText.setText(marbete.getOwner()!=null? marbete.getOwner():"");
-                modelDgiiText.setText(marbete.getModel()!=null? marbete.getBrand()+" - "+ marbete.getModel():"");
+                modelDgiiText.setText(marbete.getModel()!=null? marbete.getBrand()+" "+ marbete.getModel()
+                        +" "+marbete.getColor()+" "+marbete.getYear_production():"");
                 if (stopCard){
                     playAlarm();
                 }
@@ -346,9 +371,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     private void playAlarm(){
-        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-        Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-        r.play();
+        alarm.play();
     }
 
     private void uploadPhoto(Marbete marbete, String imagePath){
@@ -374,13 +397,26 @@ public class CameraActivity extends AppCompatActivity {
 
     private void dismissDialog(){
         mCamera.start();
+        alarm.stop();
         resultDialog.dismiss();
+        if (autoShoot){
+            CameraActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    new Handler().postDelayed(new Runnable() {
+                        public void run() {
+                            mCamera.captureImage();
+                        }
+                    }, 1400);
+                }
+            });
+        }
     }
 
     private Map<String, String> getCoordenates(){
         Map<String, String> coordinates= new HashMap<>();
-        coordinates.put("latitude", "18");
-        coordinates.put("longitude", "20.332");
+        coordinates.put("latitude", "18.481653");
+        coordinates.put("longitude", "-69.955808");
         return coordinates;
     }
 }

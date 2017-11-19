@@ -32,7 +32,9 @@ public class LauncherActivity extends AppCompatActivity {
                 .withPermissions(
                         Manifest.permission.CAMERA,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.RECORD_AUDIO
+                        Manifest.permission.RECORD_AUDIO,
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_FINE_LOCATION
                 ).withListener(new BaseMultiplePermissionsListener() {
                                    @Override
                                    public void onPermissionsChecked(MultiplePermissionsReport report) {
@@ -70,7 +72,7 @@ public class LauncherActivity extends AppCompatActivity {
 
     private Class getNextActivity(){
         PreferenceHelper helper = new PreferenceHelper(this);
-        if (helper.isUserLogged()) return MainActivity.class;
+        if (helper.isUserLogged()) return CameraActivity.class;
         return LoginActivity.class;
     }
 

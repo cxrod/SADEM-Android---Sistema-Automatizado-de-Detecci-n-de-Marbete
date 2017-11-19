@@ -5,7 +5,7 @@
 
     <!-- Launcher permission denied dialog-->
     <string name="dialog_denied_title">Disculpe</string>
-    <string name="dialog_denied_content">Los permisos de camara y almacenamientos son necesarios para el correcto funcionamiento de la aplicación.</string>
+    <string name="dialog_denied_content">Estos permisos son necesarios para el correcto funcionamiento de la aplicación.</string>
     <string name="dialog_denied_ok">Reintentar</string>
     <string name="dialog_denied_cancel">Salir</string>
 
