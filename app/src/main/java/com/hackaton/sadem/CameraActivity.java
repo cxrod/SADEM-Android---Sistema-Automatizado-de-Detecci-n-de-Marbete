@@ -117,6 +117,7 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         mCamera.stop();
+        dismissDialog();
         resultDialog = null;
         super.onPause();
     }
